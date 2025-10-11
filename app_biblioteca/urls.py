@@ -1,16 +1,43 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 from .views import (
-    lista_libros, lista_lectores, lista_bibliotecas, lista_autores,
-    lista_nacionalidades, lista_comunas, lista_direcciones, lista_prestamos
+    inicio,
+    NacionalidadViewSet,
+    AutorViewSet,
+    ComunaViewSet,
+    DireccionViewSet,
+    BibliotecaViewSet,
+    LibroViewSet,
+    LectorViewSet,
+    PrestamoViewSet
 )
+from django.shortcuts import redirect
 
+# -------------------------------
+# Redirigir raíz al login
+# -------------------------------
+def home(request):
+    return redirect('login')
+
+# -------------------------------
+# Router DRF
+# -------------------------------
+router = routers.DefaultRouter()
+router.register(r'nacionalidades', NacionalidadViewSet)
+router.register(r'autores', AutorViewSet)
+router.register(r'comunas', ComunaViewSet)
+router.register(r'direcciones', DireccionViewSet)
+router.register(r'bibliotecas', BibliotecaViewSet)
+router.register(r'libros', LibroViewSet)
+router.register(r'lectores', LectorViewSet)
+router.register(r'prestamos', PrestamoViewSet)
+
+# -------------------------------
+# URLs
+# -------------------------------
 urlpatterns = [
-    path('libros/', lista_libros, name='libros'),
-    path('lectores/', lista_lectores, name='lectores'),
-    path('bibliotecas/', lista_bibliotecas, name='bibliotecas'),
-    path('autores/', lista_autores, name='autores'),
-    path('nacionalidades/', lista_nacionalidades, name='nacionalidades'),
-    path('comunas/', lista_comunas, name='comunas'),
-    path('direcciones/', lista_direcciones, name='direcciones'),
-    path('prestamos/', lista_prestamos, name='prestamos'),
+    path('', home, name='home'),         # Raíz → redirige al login
+    path('inicio/', inicio, name='inicio'),  # Vista protegida
+    path('', include(router.urls)),      # Endpoints API REST
 ]
+
