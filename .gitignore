@@ -1,0 +1,13 @@
+# Entorno virtual
+venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Base de datos SQLite
+db.sqlite3
+
+# Logs
+*.log
