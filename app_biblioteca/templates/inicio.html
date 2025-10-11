@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca - Inicio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 30px;
+            gap: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 220px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .card a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .card p {
+            font-size: 0.9em;
+            color: #555;
+            margin: 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ mensaje }}</h1>
+        <p>Selecciona una opción para gestionar tu biblioteca</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <a href="/admin/app_libreria/libro/">Gestionar Libros</a>
+            <p>Agregar, editar o eliminar libros disponibles</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/lector/">Ver Lectores</a>
+            <p>Revisar y administrar los lectores registrados</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/biblioteca/">Administrar Bibliotecas</a>
+            <p>Gestionar las sucursales de la biblioteca</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/autor/">Registrar Autores</a>
+            <p>Agregar o editar autores de los libros</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/nacionalidad/">Administrar Nacionalidades</a>
+            <p>Gestionar nacionalidades de autores o lectores</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/comuna/">Administrar Comunas</a>
+            <p>Revisar y gestionar las comunas registradas</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/direccion/">Gestionar Direcciones</a>
+            <p>Administrar direcciones de lectores y bibliotecas</p>
+        </div>
+        <div class="card">
+            <a href="/admin/app_libreria/prestamo/">Gestionar Préstamos</a>
+            <p>Registrar y controlar préstamos de libros</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Biblioteca - Administración de modelos con Django</p>
+    </footer>
+</body>
+</html>

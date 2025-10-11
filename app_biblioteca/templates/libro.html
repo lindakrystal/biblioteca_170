@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }}</title>
+</head>
+<body>
+    <h1>{{ titulo }}</h1>
+    <ul>
+        {% for obj in objetos %}
+        <li>{{ obj }}</li>
+        {% empty %}
+        <li>No hay registros</li>
+        {% endfor %}
+    </ul>
+    <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>
