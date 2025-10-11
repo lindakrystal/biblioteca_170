@@ -14,18 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
 from django.urls import path, include
-from app_biblioteca.views import (
-    inicio, lista_libros, lista_lectores, lista_bibliotecas, lista_autores,
-    lista_nacionalidades, lista_comunas, lista_direcciones, lista_prestamos
-)
-from django.contrib.auth import views as auth_views
-# ...existing code...
+from app_biblioteca.views import inicio  # Importa la vista principal desde views.py
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', inicio, name='inicio'),  # Página principal
-    path('app_biblioteca/', include('app_biblioteca.urls')),
+    path('app_biblioteca/', include('app_biblioteca.urls')),  # URLs de la app
 ]

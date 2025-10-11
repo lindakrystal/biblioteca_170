@@ -74,4 +74,3 @@ def lista_direcciones(request):
 def lista_prestamos(request):
     prestamos = Prestamo.objects.all()
     return render(request, "prestamos.html", {"objetos": prestamos, "titulo": "Préstamos"})
-
