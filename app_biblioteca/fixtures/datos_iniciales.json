@@ -1,0 +1,88 @@
+[
+  {
+    "model": "app_biblioteca.nacionalidad",
+    "pk": 1,
+    "fields": {
+      "pais": "Chile",
+      "nacionalidad": "Chilena"
+    }
+  },
+  {
+    "model": "app_biblioteca.nacionalidad",
+    "pk": 2,
+    "fields": {
+      "pais": "Argentina",
+      "nacionalidad": "Argentina"
+    }
+  },
+  {
+    "model": "app_biblioteca.comuna",
+    "pk": 1,
+    "fields": {
+      "codigo": "001",
+      "nombre": "Santiago"
+    }
+  },
+  {
+    "model": "app_biblioteca.direccion",
+    "pk": 1,
+    "fields": {
+      "comuna": 1,
+      "calle": "Av. Libertador",
+      "numero": "1234",
+      "departamento": ""
+    }
+  },
+  {
+    "model": "app_biblioteca.biblioteca",
+    "pk": 1,
+    "fields": {
+      "nombre": "Biblioteca Central",
+      "direccion": 1
+    }
+  },
+  {
+    "model": "app_biblioteca.autor",
+    "pk": 1,
+    "fields": {
+      "nombre": "Gabriel García Márquez",
+      "nacionalidad": 1,
+      "bio": "Autor colombiano, Premio Nobel de Literatura."
+    }
+  },
+  {
+    "model": "app_biblioteca.libro",
+    "pk": 1,
+    "fields": {
+      "titulo": "Cien años de soledad",
+      "autor": 1,
+      "paginas": 471,
+      "copias": 10,
+      "biblioteca": 1,
+      "habilitado": true
+    }
+  },
+  {
+    "model": "app_biblioteca.lector",
+    "pk": 1,
+    "fields": {
+      "rut": 12345678,
+      "digito_verificador": "9",
+      "nombre": "Juan Pérez",
+      "direccion": 1,
+      "biblioteca": 1,
+      "habilitado": true
+    }
+  },
+  {
+    "model": "app_biblioteca.prestamo",
+    "pk": 1,
+    "fields": {
+      "libro": 1,
+      "lector": 1,
+      "fecha_prestamo": "2025-10-14T10:00:00Z",
+      "plazo_devolucion": "2025-10-28T10:00:00Z",
+      "fecha_entrega": null
+    }
+  }
+]

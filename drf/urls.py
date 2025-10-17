@@ -27,19 +27,26 @@ schema_view = get_schema_view(
 )
 
 # -------------------------------
-# URLs del proyecto
+# URLs del proyecto (modo clásico con CSRF)
 # -------------------------------
 urlpatterns = [
+    # Redirige raíz al login
     path('', lambda request: redirect('login/'), name='root'),
+
+    # Login y logout tradicionales (Django con CSRF)
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
 
-    path('inicio/', inicio, name='inicio'),  # página principal protegida
+    # Página principal protegida
+    path('inicio/', inicio, name='inicio'),
 
+    # Admin de Django
     path('admin/', admin.site.urls),
+
+    # Rutas de la aplicación principal
     path('app_biblioteca/', include('app_biblioteca.urls')),
 
-    # Documentación de la API
+    # Documentación Swagger / Redoc
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

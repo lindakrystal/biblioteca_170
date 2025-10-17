@@ -36,8 +36,7 @@ router.register(r'prestamos', PrestamoViewSet)
 # URLs
 # -------------------------------
 urlpatterns = [
-    path('', home, name='home'),         # Raíz → redirige al login
-    path('inicio/', inicio, name='inicio'),  # Vista protegida
-    path('', include(router.urls)),      # Endpoints API REST
+    path('', home, name='home'),
+    path('inicio/', inicio, name='inicio'),
+    path('', include(router.urls)),
 ]
-
