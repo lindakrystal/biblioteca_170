@@ -4,21 +4,15 @@ from datetime import date
 import requests
 
 # -------------------------
-# Función de validación RUT chileno (con opción de validación en línea)
+# Función de validación RUT chileno
 # -------------------------
 def validar_rut_chileno(rut_completo):
-    """
-    Valida RUT chileno con formato '12.345.678-9' o '12345678-9'.
-    Si la API de rut.chile está disponible, se valida también en línea.
-    """
     rut_completo = rut_completo.replace(".", "").replace("-", "")
     if len(rut_completo) < 2:
         raise ValidationError("RUT demasiado corto")
-
     rut = rut_completo[:-1]
     dv = rut_completo[-1].upper()
 
-    # Calcular dígito verificador
     factor = 2
     total = 0
     for digit in reversed(rut):
@@ -37,7 +31,7 @@ def validar_rut_chileno(rut_completo):
     if dv != dv_calculado:
         raise ValidationError(f"RUT inválido: {rut}-{dv}")
 
-    # Validación adicional (opcional) con la API pública de RUT Chile
+    # Validación opcional en línea
     try:
         response = requests.get(f"https://api.libreapi.cl/rut/validate?rut={rut}-{dv}")
         if response.status_code == 200:
@@ -45,9 +39,7 @@ def validar_rut_chileno(rut_completo):
             if not data.get("valid"):
                 raise ValidationError("El RUT no es válido según rut.chile")
     except Exception:
-        # Si la API falla, continúa con la validación local
         pass
-
 
 # -------------------------
 # Modelos básicos
@@ -111,21 +103,23 @@ class Libro(models.Model):
 # Modelo Lector con validaciones
 # -------------------------
 class Lector(models.Model):
-    rut = models.CharField(max_length=12, unique=True, help_text="Formato: 12.345.678-9")
+    rut = models.CharField(
+        max_length=12, unique=True, verbose_name="RUT",
+        help_text="Formato: 12.345.678-9"
+    )
     nombre = models.CharField(max_length=200)
     direccion = models.ForeignKey(Direccion, on_delete=models.CASCADE)
     biblioteca = models.ForeignKey(Biblioteca, on_delete=models.CASCADE)
-    fecha_nacimiento = models.DateField()
+    fecha_nacimiento = models.DateField(verbose_name="Fecha de Nacimiento")
     habilitado = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.nombre} ({self.rut})"
 
     def clean(self):
-        # Validar formato y existencia del RUT
+        # Validar RUT
         validar_rut_chileno(self.rut)
-
-        # Validar edad mínima (5 años)
+        # Validar edad mínima de 5 años
         hoy = date.today()
         edad = hoy.year - self.fecha_nacimiento.year - (
             (hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
@@ -134,6 +128,9 @@ class Lector(models.Model):
             raise ValidationError("El lector debe tener al menos 5 años de edad.")
 
 
+# -------------------------
+# Modelo Préstamo
+# -------------------------
 class Prestamo(models.Model):
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
     lector = models.ForeignKey(Lector, on_delete=models.CASCADE)
