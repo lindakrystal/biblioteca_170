@@ -27,14 +27,16 @@ class LibroAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'autor', 'biblioteca', 'habilitado')
 
 # -------------------------
-# Admin Lector con validación RUT chileno y edad
+# Admin Lector con validación de RUT y edad
 # -------------------------
 @admin.register(Lector)
 class LectorAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'rut', 'fecha_nacimiento', 'biblioteca', 'habilitado')
+    search_fields = ('nombre', 'rut')
+    list_filter = ('biblioteca', 'habilitado')
 
     def save_model(self, request, obj, form, change):
-        obj.full_clean()  # ejecuta clean() con validaciones
+        obj.full_clean()  # Ejecuta validaciones del modelo
         super().save_model(request, obj, form, change)
 
 @admin.register(Prestamo)

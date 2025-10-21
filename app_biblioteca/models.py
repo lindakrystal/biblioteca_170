@@ -1,14 +1,15 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import date
+import requests
 
 # -------------------------
-# Función de validación RUT chileno
+# Función de validación RUT chileno (con opción de validación en línea)
 # -------------------------
 def validar_rut_chileno(rut_completo):
     """
     Valida RUT chileno con formato '12.345.678-9' o '12345678-9'.
-    Lanza ValidationError si es inválido.
+    Si la API de rut.chile está disponible, se valida también en línea.
     """
     rut_completo = rut_completo.replace(".", "").replace("-", "")
     if len(rut_completo) < 2:
@@ -36,9 +37,20 @@ def validar_rut_chileno(rut_completo):
     if dv != dv_calculado:
         raise ValidationError(f"RUT inválido: {rut}-{dv}")
 
+    # Validación adicional (opcional) con la API pública de RUT Chile
+    try:
+        response = requests.get(f"https://api.libreapi.cl/rut/validate?rut={rut}-{dv}")
+        if response.status_code == 200:
+            data = response.json()
+            if not data.get("valid"):
+                raise ValidationError("El RUT no es válido según rut.chile")
+    except Exception:
+        # Si la API falla, continúa con la validación local
+        pass
+
 
 # -------------------------
-# Otros modelos
+# Modelos básicos
 # -------------------------
 class Nacionalidad(models.Model):
     pais = models.CharField(max_length=100)
@@ -96,7 +108,7 @@ class Libro(models.Model):
 
 
 # -------------------------
-# Lector con RUT chileno y fecha de nacimiento
+# Modelo Lector con validaciones
 # -------------------------
 class Lector(models.Model):
     rut = models.CharField(max_length=12, unique=True, help_text="Formato: 12.345.678-9")
@@ -110,16 +122,16 @@ class Lector(models.Model):
         return f"{self.nombre} ({self.rut})"
 
     def clean(self):
-        # Validar RUT chileno
+        # Validar formato y existencia del RUT
         validar_rut_chileno(self.rut)
 
-        # Validar edad mínima 5 años
+        # Validar edad mínima (5 años)
         hoy = date.today()
         edad = hoy.year - self.fecha_nacimiento.year - (
             (hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
         )
         if edad < 5:
-            raise ValidationError("El lector debe tener al menos 5 años")
+            raise ValidationError("El lector debe tener al menos 5 años de edad.")
 
 
 class Prestamo(models.Model):
