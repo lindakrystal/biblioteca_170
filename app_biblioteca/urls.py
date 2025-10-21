@@ -1,7 +1,10 @@
 from django.urls import path, include
 from rest_framework import routers
+from django.shortcuts import redirect
+from django.contrib.auth import views as auth_views
 from .views import (
     inicio,
+    registro,
     NacionalidadViewSet,
     AutorViewSet,
     ComunaViewSet,
@@ -11,7 +14,6 @@ from .views import (
     LectorViewSet,
     PrestamoViewSet
 )
-from django.shortcuts import redirect
 
 # -------------------------------
 # Redirigir raíz al login
@@ -36,7 +38,15 @@ router.register(r'prestamos', PrestamoViewSet)
 # URLs
 # -------------------------------
 urlpatterns = [
+    # Redirección raíz
     path('', home, name='home'),
+
+    # Vistas HTML
     path('inicio/', inicio, name='inicio'),
-    path('', include(router.urls)),
+    path('registro/', registro, name='registro'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+    # API DRF
+    path('api/', include(router.urls)),
 ]

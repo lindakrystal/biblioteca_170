@@ -130,3 +130,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/inicio/'   # redirige aquí después del login
 LOGOUT_REDIRECT_URL = '/login/'
 LOGIN_URL = '/login/'  # Logout va al login
+
+# SESSION expira después de 1 hora 
+SESSION_COOKIE_AGE = 3600 
+ 
+# SESSION expira al cerrar el navegador 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
+ 
+# Usamos la DB para SESSION 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db' 

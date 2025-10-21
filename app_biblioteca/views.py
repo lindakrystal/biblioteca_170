@@ -1,5 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -17,12 +21,40 @@ from .serializer import (
 )
 
 # -------------------------------
-# Vista HTML principal
+# Vistas HTML
 # -------------------------------
 @login_required(login_url='/login/')
 def inicio(request):
     """Vista principal protegida: solo usuarios logueados pueden entrar."""
-    return render(request, 'inicio.html')
+
+    # Guardar mensaje de bienvenida en la sesión si no existe
+    if 'mensaje_bienvenida' not in request.session:
+        request.session['mensaje_bienvenida'] = f'¡Bienvenido {request.user.username}!'
+
+    # Obtener mensaje desde la sesión
+    mensaje_bienvenida = request.session.get('mensaje_bienvenida')
+
+    # Eliminar mensaje para que solo se muestre una vez
+    if 'mensaje_bienvenida' in request.session:
+        del request.session['mensaje_bienvenida']
+
+    return render(request, 'inicio.html', {'message': mensaje_bienvenida})
+
+
+def registro(request):
+    """Permite registrar nuevos usuarios."""
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # inicia sesión automáticamente
+            messages.success(request, "Registro Exitoso. ¡Bienvenido!")
+            return redirect('inicio')  # redirige al inicio
+        else:
+            messages.error(request, "No ha sido posible registrarlo. Revise el formulario por errores.")
+    else:
+        form = UserCreationForm()
+    return render(request, 'registro.html', {'form': form})
 
 # -------------------------------
 # Configuración de autenticación DRF

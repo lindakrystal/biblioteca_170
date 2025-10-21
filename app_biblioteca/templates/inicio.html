@@ -15,6 +15,7 @@
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
         h1 {
             margin: 0;
@@ -63,11 +64,30 @@
             padding: 20px;
             color: #555;
         }
+        .logout {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+        .logout:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 <body>
+    <!-- Botón de logout usando POST, visible en esquina superior derecha -->
+    <form method="post" action="{% url 'logout' %}" style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+        {% csrf_token %}
+        <button type="submit" class="logout">Cerrar sesión</button>
+    </form>
+
     <header>
-        <h1>{{ mensaje }}</h1>
+        <!-- Mostrar mensaje de bienvenida desde la sesión -->
+        <h1>{{ message|default:"Bienvenido a la Biblioteca" }}</h1>
         <p>Selecciona una opción para gestionar tu biblioteca</p>
     </header>
 
