@@ -1,5 +1,45 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from datetime import date
 
+# -------------------------
+# Función de validación RUT chileno
+# -------------------------
+def validar_rut_chileno(rut_completo):
+    """
+    Valida RUT chileno con formato '12.345.678-9' o '12345678-9'.
+    Lanza ValidationError si es inválido.
+    """
+    rut_completo = rut_completo.replace(".", "").replace("-", "")
+    if len(rut_completo) < 2:
+        raise ValidationError("RUT demasiado corto")
+
+    rut = rut_completo[:-1]
+    dv = rut_completo[-1].upper()
+
+    # Calcular dígito verificador
+    factor = 2
+    total = 0
+    for digit in reversed(rut):
+        total += int(digit) * factor
+        factor += 1
+        if factor > 7:
+            factor = 2
+    dv_calculado = 11 - (total % 11)
+    if dv_calculado == 11:
+        dv_calculado = "0"
+    elif dv_calculado == 10:
+        dv_calculado = "K"
+    else:
+        dv_calculado = str(dv_calculado)
+
+    if dv != dv_calculado:
+        raise ValidationError(f"RUT inválido: {rut}-{dv}")
+
+
+# -------------------------
+# Otros modelos
+# -------------------------
 class Nacionalidad(models.Model):
     pais = models.CharField(max_length=100)
     nacionalidad = models.CharField(max_length=100)
@@ -55,16 +95,31 @@ class Libro(models.Model):
         return self.titulo
 
 
+# -------------------------
+# Lector con RUT chileno y fecha de nacimiento
+# -------------------------
 class Lector(models.Model):
-    rut = models.IntegerField()
-    digito_verificador = models.CharField(max_length=1)
+    rut = models.CharField(max_length=12, unique=True, help_text="Formato: 12.345.678-9")
     nombre = models.CharField(max_length=200)
     direccion = models.ForeignKey(Direccion, on_delete=models.CASCADE)
     biblioteca = models.ForeignKey(Biblioteca, on_delete=models.CASCADE)
+    fecha_nacimiento = models.DateField()
     habilitado = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.nombre} ({self.rut}-{self.digito_verificador})"
+        return f"{self.nombre} ({self.rut})"
+
+    def clean(self):
+        # Validar RUT chileno
+        validar_rut_chileno(self.rut)
+
+        # Validar edad mínima 5 años
+        hoy = date.today()
+        edad = hoy.year - self.fecha_nacimiento.year - (
+            (hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
+        )
+        if edad < 5:
+            raise ValidationError("El lector debe tener al menos 5 años")
 
 
 class Prestamo(models.Model):

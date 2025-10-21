@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from .models import Nacionalidad, Autor, Comuna, Direccion, Biblioteca, Libro, Lector, Prestamo
 
 @admin.register(Nacionalidad)
@@ -25,9 +26,16 @@ class BibliotecaAdmin(admin.ModelAdmin):
 class LibroAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'autor', 'biblioteca', 'habilitado')
 
+# -------------------------
+# Admin Lector con validación RUT chileno y edad
+# -------------------------
 @admin.register(Lector)
 class LectorAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'rut', 'digito_verificador', 'biblioteca', 'habilitado')
+    list_display = ('nombre', 'rut', 'fecha_nacimiento', 'biblioteca', 'habilitado')
+
+    def save_model(self, request, obj, form, change):
+        obj.full_clean()  # ejecuta clean() con validaciones
+        super().save_model(request, obj, form, change)
 
 @admin.register(Prestamo)
 class PrestamoAdmin(admin.ModelAdmin):
