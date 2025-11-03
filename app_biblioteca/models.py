@@ -7,12 +7,14 @@ import requests
 # Función de validación RUT chileno
 # -------------------------
 def validar_rut_chileno(rut_completo):
+    """Valida un RUT chileno con dígito verificador."""
     rut_completo = rut_completo.replace(".", "").replace("-", "")
     if len(rut_completo) < 2:
-        raise ValidationError("RUT demasiado corto")
+        raise ValidationError("RUT demasiado corto.")
     rut = rut_completo[:-1]
     dv = rut_completo[-1].upper()
 
+    # Calcular dígito verificador
     factor = 2
     total = 0
     for digit in reversed(rut):
@@ -31,7 +33,7 @@ def validar_rut_chileno(rut_completo):
     if dv != dv_calculado:
         raise ValidationError(f"RUT inválido: {rut}-{dv}")
 
-    # Validación opcional en línea
+    # Validación opcional con API externa (no detiene si falla)
     try:
         response = requests.get(f"https://api.libreapi.cl/rut/validate?rut={rut}-{dv}")
         if response.status_code == 200:
@@ -41,8 +43,9 @@ def validar_rut_chileno(rut_completo):
     except Exception:
         pass
 
+
 # -------------------------
-# Modelos básicos
+# Modelos base
 # -------------------------
 class Nacionalidad(models.Model):
     pais = models.CharField(max_length=100)
@@ -100,11 +103,13 @@ class Libro(models.Model):
 
 
 # -------------------------
-# Modelo Lector con validaciones
+# Modelo Lector con validaciones (RUT + edad)
 # -------------------------
 class Lector(models.Model):
     rut = models.CharField(
-        max_length=12, unique=True, verbose_name="RUT",
+        max_length=12,
+        unique=True,
+        verbose_name="RUT",
         help_text="Formato: 12.345.678-9"
     )
     nombre = models.CharField(max_length=200)
@@ -117,15 +122,22 @@ class Lector(models.Model):
         return f"{self.nombre} ({self.rut})"
 
     def clean(self):
-        # Validar RUT
+        """Validación personalizada para RUT y edad mínima."""
+        # Validar RUT chileno
         validar_rut_chileno(self.rut)
-        # Validar edad mínima de 5 años
+
+        # Validar mayoría de edad (mínimo 18 años)
         hoy = date.today()
         edad = hoy.year - self.fecha_nacimiento.year - (
             (hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
         )
-        if edad < 5:
-            raise ValidationError("El lector debe tener al menos 5 años de edad.")
+        if edad < 18:
+            raise ValidationError("El lector debe tener al menos 18 años de edad.")
+
+    def save(self, *args, **kwargs):
+        """Ejecuta las validaciones antes de guardar."""
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 # -------------------------
