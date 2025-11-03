@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 from .views import (
     inicio,
     registro,
+    logout_view,  # 👈 tu función personalizada
     NacionalidadViewSet,
     AutorViewSet,
     ComunaViewSet,
@@ -12,7 +13,7 @@ from .views import (
     BibliotecaViewSet,
     LibroViewSet,
     LectorViewSet,
-    PrestamoViewSet
+    PrestamoViewSet,
 )
 
 # -------------------------------
@@ -22,7 +23,7 @@ def home(request):
     return redirect('login')
 
 # -------------------------------
-# Router DRF
+# Router DRF (rutas API REST)
 # -------------------------------
 router = routers.DefaultRouter()
 router.register(r'nacionalidades', NacionalidadViewSet)
@@ -35,7 +36,7 @@ router.register(r'lectores', LectorViewSet)
 router.register(r'prestamos', PrestamoViewSet)
 
 # -------------------------------
-# URLs
+# URLs principales
 # -------------------------------
 urlpatterns = [
     # Redirección raíz
@@ -45,8 +46,13 @@ urlpatterns = [
     path('inicio/', inicio, name='inicio'),
     path('registro/', registro, name='registro'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 
-    # API DRF
-    path('api/', include(router.urls)),
+    # 👇 Aquí reemplazamos la vista por defecto por tu función personalizada
+    path('logout/', logout_view, name='logout'),
+
+    # API REST Framework
+    path('', include(router.urls)),
+
+    # Navegador DRF (opcional, útil en desarrollo)
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

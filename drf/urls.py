@@ -2,18 +2,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 from django.contrib.auth import views as auth_views
-from app_biblioteca.views import inicio
+from app_biblioteca.views import inicio, logout_view  # 👈 importante
 
-# -------------------------------
-# Importaciones para Swagger
-# -------------------------------
+# Swagger
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-# -------------------------------
-# Configuración del esquema DRF
-# -------------------------------
 schema_view = get_schema_view(
     openapi.Info(
         title="app_biblioteca API",
@@ -26,27 +21,27 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 
-# -------------------------------
-# URLs del proyecto (modo clásico con CSRF)
-# -------------------------------
 urlpatterns = [
     # Redirige raíz al login
     path('', lambda request: redirect('login/'), name='root'),
 
-    # Login y logout tradicionales (Django con CSRF)
+    # Login y logout personalizados
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
+    path('logout/', logout_view, name='logout'),  # 👈 ahora usa tu función con mensaje
 
-    # Página principal protegida
+    # Página principal
     path('inicio/', inicio, name='inicio'),
 
     # Admin de Django
     path('admin/', admin.site.urls),
 
-    # Rutas de la aplicación principal
+    # Rutas de la app principal
     path('app_biblioteca/', include('app_biblioteca.urls')),
 
-    # Documentación Swagger / Redoc
+    # Swagger / Redoc
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+    # Login DRF (para pruebas)
+    path('api-auth/', include('rest_framework.urls')),
 ]

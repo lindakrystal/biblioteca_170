@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.contrib.auth import logout
 
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -56,6 +57,12 @@ def registro(request):
         form = UserCreationForm()
     return render(request, 'registro.html', {'form': form})
 
+def logout_view(request):
+    """Cierra la sesión del usuario."""
+   
+    logout(request)
+    messages.info(request, "Has cerrado sesión exitosamente.")
+    return redirect('login')
 # -------------------------------
 # Configuración de autenticación DRF
 # -------------------------------
