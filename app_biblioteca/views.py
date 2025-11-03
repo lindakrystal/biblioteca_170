@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -30,7 +32,7 @@ from .serializer import (
 )
 
 # -------------------------------
-# Vistas HTML
+# VISTAS HTML
 # -------------------------------
 @login_required(login_url='/login/')
 def inicio(request):
@@ -67,14 +69,14 @@ def logout_view(request):
 
 
 # -------------------------------
-# Configuración de autenticación DRF
+# CONFIGURACIÓN DE AUTENTICACIÓN DRF
 # -------------------------------
 auth_classes = [TokenAuthentication, SessionAuthentication, BasicAuthentication]
 perm_classes = [IsAuthenticated]
 
 
 # -------------------------------
-# ViewSets DRF (CRUD API)
+# VIEWSETS DRF (CRUD API)
 # -------------------------------
 class NacionalidadViewSet(viewsets.ModelViewSet):
     queryset = Nacionalidad.objects.all()
@@ -118,11 +120,26 @@ class LibroViewSet(viewsets.ModelViewSet):
     permission_classes = perm_classes
 
 
+# -------------------------------
+# LECTOR CON VALIDACIONES PERSONALIZADAS
+# -------------------------------
 class LectorViewSet(viewsets.ModelViewSet):
     queryset = Lector.objects.all()
     serializer_class = LectorSerializer
     authentication_classes = auth_classes
     permission_classes = perm_classes
+
+    def create(self, request, *args, **kwargs):
+        """Sobrescribe POST para capturar validaciones de modelo (edad, RUT)."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            lector = Lector(**serializer.validated_data)
+            lector.clean()  # Ejecuta validaciones del modelo
+            lector.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PrestamoViewSet(viewsets.ModelViewSet):
