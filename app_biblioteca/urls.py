@@ -47,7 +47,7 @@ urlpatterns = [
     path('registro/', registro, name='registro'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
 
-    # 👇 Aquí reemplazamos la vista por defecto por tu función personalizada
+    #  Aquí reemplazamos la vista por defecto por tu función personalizada
     path('logout/', logout_view, name='logout'),
 
     # API REST Framework

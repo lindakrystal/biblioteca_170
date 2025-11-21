@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
 
     # Apps del proyecto
     'app_biblioteca',
@@ -117,13 +118,21 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # -----------------------------
-# REST FRAMEWORK (💥 IMPORTANTE)
+# REST FRAMEWORK ( IMPORTANTE)
 # -----------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',  # Token 🔑
+        'rest_framework.authentication.TokenAuthentication',  # Token
+        'rest_framework.authentication.SessionAuthentication',  # Opcional, por si usas login
     ],
+
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Todo requiere token
+    ],
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',  # Filtros exactos
+        'rest_framework.filters.SearchFilter',                # Búsqueda
+        'rest_framework.filters.OrderingFilter',              # Ordenamiento
     ]
 }

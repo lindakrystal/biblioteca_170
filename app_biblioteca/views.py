@@ -31,12 +31,12 @@ from .serializer import (
     PrestamoSerializer
 )
 
-# -------------------------------
+# -------------------------------------
 # VISTAS HTML
-# -------------------------------
+# -------------------------------------
 @login_required(login_url='/login/')
 def inicio(request):
-    """Vista principal protegida: solo usuarios logueados pueden entrar."""
+    """Vista principal protegida."""
     if 'mensaje_bienvenida' not in request.session:
         request.session['mensaje_bienvenida'] = f'¡Bienvenido {request.user.username}!'
     mensaje_bienvenida = request.session.get('mensaje_bienvenida')
@@ -46,7 +46,6 @@ def inicio(request):
 
 
 def registro(request):
-    """Permite registrar nuevos usuarios."""
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -55,34 +54,39 @@ def registro(request):
             messages.success(request, "Registro exitoso. ¡Bienvenido!")
             return redirect('inicio')
         else:
-            messages.error(request, "Error al registrar el usuario. Revise los campos.")
+            messages.error(request, "Error en el formulario.")
     else:
         form = UserCreationForm()
     return render(request, 'registro.html', {'form': form})
 
 
 def logout_view(request):
-    """Cierra la sesión del usuario y muestra mensaje."""
+    """Cierra sesión con mensaje."""
     logout(request)
     messages.info(request, "Has cerrado sesión exitosamente.")
     return redirect('login')
 
 
-# -------------------------------
-# CONFIGURACIÓN DE AUTENTICACIÓN DRF
-# -------------------------------
+# -------------------------------------
+# CONFIGURACIÓN DRF
+# -------------------------------------
 auth_classes = [TokenAuthentication, SessionAuthentication, BasicAuthentication]
 perm_classes = [IsAuthenticated]
 
 
-# -------------------------------
-# VIEWSETS DRF (CRUD API)
-# -------------------------------
+# -------------------------------------
+# VIEWSETS con FILTERS
+# -------------------------------------
 class NacionalidadViewSet(viewsets.ModelViewSet):
     queryset = Nacionalidad.objects.all()
     serializer_class = NacionalidadSerializer
     authentication_classes = auth_classes
     permission_classes = perm_classes
+
+    # filtros
+    filterset_fields = ['pais', 'nacionalidad']
+    search_fields = ['pais', 'nacionalidad']
+    ordering_fields = ['pais', 'nacionalidad']
 
 
 class AutorViewSet(viewsets.ModelViewSet):
@@ -91,12 +95,20 @@ class AutorViewSet(viewsets.ModelViewSet):
     authentication_classes = auth_classes
     permission_classes = perm_classes
 
+    filterset_fields = ['nacionalidad']
+    search_fields = ['nombre']
+    ordering_fields = ['nombre']
+
 
 class ComunaViewSet(viewsets.ModelViewSet):
     queryset = Comuna.objects.all()
     serializer_class = ComunaSerializer
     authentication_classes = auth_classes
     permission_classes = perm_classes
+
+    filterset_fields = ['codigo', 'nombre']
+    search_fields = ['nombre']
+    ordering_fields = ['nombre']
 
 
 class DireccionViewSet(viewsets.ModelViewSet):
@@ -105,12 +117,20 @@ class DireccionViewSet(viewsets.ModelViewSet):
     authentication_classes = auth_classes
     permission_classes = perm_classes
 
+    filterset_fields = ['comuna']
+    search_fields = ['calle']
+    ordering_fields = ['calle', 'numero']
+
 
 class BibliotecaViewSet(viewsets.ModelViewSet):
     queryset = Biblioteca.objects.all()
     serializer_class = BibliotecaSerializer
     authentication_classes = auth_classes
     permission_classes = perm_classes
+
+    filterset_fields = ['direccion__comuna']
+    search_fields = ['nombre']
+    ordering_fields = ['nombre']
 
 
 class LibroViewSet(viewsets.ModelViewSet):
@@ -119,23 +139,32 @@ class LibroViewSet(viewsets.ModelViewSet):
     authentication_classes = auth_classes
     permission_classes = perm_classes
 
+    filterset_fields = ['autor', 'biblioteca', 'habilitado']
+    search_fields = ['titulo']
+    ordering_fields = ['titulo', 'paginas', 'copias']
 
-# -------------------------------
-# LECTOR CON VALIDACIONES PERSONALIZADAS
-# -------------------------------
+
+# -------------------------------------
+# LECTOR CON VALIDACIONES ESPECIALES
+# -------------------------------------
 class LectorViewSet(viewsets.ModelViewSet):
     queryset = Lector.objects.all()
     serializer_class = LectorSerializer
     authentication_classes = auth_classes
     permission_classes = perm_classes
 
+    filterset_fields = ['biblioteca', 'habilitado']
+    search_fields = ['nombre', 'rut']
+    ordering_fields = ['nombre', 'rut']
+
     def create(self, request, *args, **kwargs):
-        """Sobrescribe POST para capturar validaciones de modelo (edad, RUT)."""
+        """Sobrescribe POST para validar edad + rut correctamente."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         try:
             lector = Lector(**serializer.validated_data)
-            lector.clean()  # Ejecuta validaciones del modelo
+            lector.clean()  # 🟢 valida RUT + edad
             lector.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
@@ -147,3 +176,7 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     serializer_class = PrestamoSerializer
     authentication_classes = auth_classes
     permission_classes = perm_classes
+
+    filterset_fields = ['libro', 'lector']
+    search_fields = ['libro__titulo', 'lector__nombre']
+    ordering_fields = ['fecha_prestamo', 'plazo_devolucion']

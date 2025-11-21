@@ -54,6 +54,6 @@ urlpatterns = [
     # Login DRF (para ver navegador API)
     path('api-auth/', include('rest_framework.urls')),
 
-    # 🔑 Endpoint para obtener token de autenticación (Postman)
+    #  Endpoint para obtener token de autenticación (Postman)
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]
